@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const mongoose = require("mongoose");
 
 var app = express();
 
@@ -9,83 +9,65 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+mongoose.connect("mongodb://127.0.0.1:27017/todo");
 
-const mongoose = require("mongoose");
-// mongoose.connect("mongodb://localhost:27017/todo");
-mongoose.connect("mongodb://127.0.0.1:27017/todo")
-
-const trySchema = new mongoose.Schema({
-    name:String
+const todoSchema = new mongoose.Schema({
+    name: String
 });
 
-const item = mongoose.model("task",trySchema);
-const todo = new item({
-    name:"Create some video"
+const Item = mongoose.model("Item", todoSchema); // Corrected to mongoose.model()
+
+const todo1 = new Item({
+    name: "Create some video"
 });
-const todo2 = new item({
-    name:"Learn DSA"
+
+const todo2 = new Item({
+    name: "Learn DSA"
 });
-const todo3 = new item({
-    name:"Learn React"
+
+const todo3 = new Item({
+    name: "Learn React"
 });
-const todo4 = new item({
-    name:"Take some rest"
+
+const todo4 = new Item({
+    name: "Take some rest"
 });
-// todo.save();
+
+// Save todos to the database
+// todo1.save();
 // todo2.save();
 // todo3.save();
 // todo4.save();
 
 app.get('/', function(req, res) {
-    item.find({},function(err, foundItems) {
-        if(err){
+    Item.find({}, function(err, foundItems) {
+        if (err) {
             console.log(err);
-        }
-        else{
-            res.render("list", {dayej: foundItems});
+        } else {
+            res.render("list", { dayej: foundItems });
         }
     });
 });
 
 app.post('/', function(req, res) {
     const itemName = req.body.ele1;
-    const todo4 = new item ({
-        name:itemName
+    const newItem = new Item({
+        name: itemName
     });
-    todo4.save();
+    newItem.save();
     res.redirect("/");
 });
 
-app.post("/delete", function (req, res) {
-    const checked = req.body.checkbox1;
-    item.findByIdAndRemove(checked, function (err){
-        if(!err) {
-            console.log("delete");
+app.post("/delete", function(req, res) {
+    const checkedItemId = req.body.checkbox1;
+    Item.findByIdAndRemove(checkedItemId, function(err) {
+        if (!err) {
+            console.log("Deleted item with id: " + checkedItemId);
             res.redirect("/");
         }
     });
-
 });
 
-app.listen("8000", function(){
-    console.log("server started");
+app.listen("4000", function() {
+    console.log("Server started on port 4000");
 });
-
-
-// var items =[];
-
-// var example ="working";
-// app.get('/', function(req, res) {
-//     res.render("list", {ejes: items})
-// });
-
-// app.post('/', function(req, res) {
-//     var item = req.body.ele1;
-//     items.push(item);
-//     res.redirect("/");
-// });
-
-
-// app.listen(4000,function(){
-//     console.log("server started");
-// });
